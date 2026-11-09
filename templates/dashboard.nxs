@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f5f7fb">
+    <title>Dashboard · CareerPath</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/careerpath.css">
+    <style>
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+            background: var(--cp-surface);
+            border-right: 1px solid var(--cp-border);
+            position: fixed;
+            padding: 25px 18px;
+        }
+        .brand { font-size: 23px; font-weight: 800; color: #6558e8; margin-bottom: 40px; }
+        .nav-link { color: #687187; padding: 13px; border-radius: 10px; margin-bottom: 7px; }
+        .nav-link.active, .nav-link:hover { background: #efedff; color: #6558e8; }
+        .main { margin-left: 250px; padding: 35px; }
+        .panel { background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; padding: 24px; height: 100%; box-shadow: var(--cp-shadow); }
+        .stat-icon { width: 45px; height: 45px; display: grid; place-items: center; border-radius: 12px; background: #efedff; color: #6558e8; font-size: 19px; }
+        .muted { color: var(--cp-muted); }
+        .tag { display: inline-block; background: #efedff; color: #6558e8; padding: 7px 12px; border-radius: 20px; margin: 4px; font-size: 13px; }
+        .recommendation { border: 1px solid var(--cp-border); border-radius: 13px; padding: 18px; }
+        .recommendation + .recommendation { margin-top: 12px; }
+        @media (max-width: 800px) {
+            .sidebar { position: relative; width: 100%; min-height: auto; }
+            .main { margin-left: 0; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="brand"><i class="fa-solid fa-compass"></i> CareerPath</div>
+    <div class="small text-uppercase muted mb-3">Workspace</div>
+    <a href="/dashboard" class="nav-link active"><i class="fa-solid fa-house me-2"></i>Dashboard</a>
+    <a href="/describe-yourself" class="nav-link"><i class="fa-solid fa-user-pen me-2"></i>My Profile</a>
+    <a href="#recommendations" class="nav-link"><i class="fa-solid fa-route me-2"></i>Career Recommendations</a>
+    <a href="/my-learning" class="nav-link"><i class="fa-solid fa-book-open me-2"></i>My Learning</a>
+    <a href="/explore" class="nav-link"><i class="fa-solid fa-compass me-2"></i>Career Explorer</a>
+    <a href="/settings" class="nav-link"><i class="fa-solid fa-gear me-2"></i>Settings</a>
+    <hr class="my-4">
+    <button class="nav-link border-0 bg-transparent w-100 text-start" id="logout">
+        <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
+    </button>
+</aside>
+
+<main class="main">
+    <header class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1">Dashboard</h1>
+            <p class="muted mb-0">Your personal career journey.</p>
+        </div>
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-solid fa-user me-1"></i><span id="dropdown-name">Account</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="/describe-yourself"><i class="fa-solid fa-user-pen me-2"></i>My profile</a></li>
+                <li><a class="dropdown-item" href="/my-learning"><i class="fa-solid fa-book-open me-2"></i>My learning</a></li>
+                <li><a class="dropdown-item" href="/settings"><i class="fa-solid fa-gear me-2"></i>Settings</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <div id="loading" class="text-center py-5" role="status">
+        <div class="spinner-border text-primary"></div>
+        <p class="muted mt-3">Loading your dashboard...</p>
+    </div>
+    <div id="error" class="alert alert-danger d-none" role="alert"></div>
+
+    <div id="dashboard-content" class="d-none">
+        <section class="panel mb-4">
+            <h2 class="h4 fw-bold">Welcome, <span id="user-name">there</span>.</h2>
+            <p class="muted mb-3">Explore a starting point for your future, based on the profile you shared.</p>
+            <div class="d-flex justify-content-between small mb-2">
+                <span>Profile completion</span><strong id="completion-label">0%</strong>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Profile completion">
+                <div class="progress-bar" id="completion-bar" style="width: 0%"></div>
+            </div>
+            <a href="/describe-yourself" class="btn btn-sm btn-outline-primary mt-3" id="edit-profile">Complete your profile</a>
+        </section>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4"><div class="panel">
+                <div class="stat-icon mb-3"><i class="fa-solid fa-user-graduate"></i></div>
+                <p class="muted mb-1">Education</p><h3 class="h5 fw-bold" id="education">Not provided</h3>
+            </div></div>
+            <div class="col-md-4"><div class="panel">
+                <div class="stat-icon mb-3"><i class="fa-solid fa-lightbulb"></i></div>
+                <p class="muted mb-1">Interests</p><h3 class="h5 fw-bold"><span id="interest-count">0</span> listed</h3>
+            </div></div>
+            <div class="col-md-4"><div class="panel">
+                <div class="stat-icon mb-3"><i class="fa-solid fa-code"></i></div>
+                <p class="muted mb-1">Skills</p><h3 class="h5 fw-bold"><span id="skill-count">0</span> listed</h3>
+            </div></div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-lg-6"><section class="panel">
+                <h2 class="h5 fw-bold mb-3"><i class="fa-solid fa-book-open text-primary me-2"></i>Your subjects</h2>
+                <div id="subjects" class="muted">No subjects added.</div>
+            </section></div>
+            <div class="col-lg-6"><section class="panel">
+                <h2 class="h5 fw-bold mb-3"><i class="fa-solid fa-heart text-danger me-2"></i>Your interests</h2>
+                <div id="interests" class="muted">No interests added.</div>
+            </section></div>
+            <div class="col-lg-6"><section class="panel">
+                <h2 class="h5 fw-bold mb-3"><i class="fa-solid fa-star text-warning me-2"></i>Your skills</h2>
+                <div id="skills" class="muted">No skills added.</div>
+            </section></div>
+            <div class="col-lg-6"><section class="panel">
+                <h2 class="h5 fw-bold mb-3"><i class="fa-solid fa-bullseye text-success me-2"></i>Preferred careers</h2>
+                <div id="careers" class="muted">No careers selected.</div>
+            </section></div>
+        </div>
+
+        <section class="panel mb-4" id="recommendations">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                <div>
+                    <h2 class="h5 fw-bold mb-1">Career paths to explore</h2>
+                    <p class="muted small mb-0">Rule-based matches from your profile, not a prediction of career success.</p>
+                </div>
+                <a class="btn btn-sm btn-outline-primary" href="/describe-yourself">Update profile</a>
+            </div>
+            <div id="recommendation-list"></div>
+        </section>
+
+        <section class="panel">
+            <h2 class="h5 fw-bold mb-2">Account information</h2>
+            <p class="muted mb-1" id="user-email"></p>
+            <p class="muted mb-1" id="verification-status"></p>
+            <p class="muted mb-0" id="created-at"></p>
+        </section>
+    </div>
+</main>
+
+<script>
+    const loading = document.getElementById("loading");
+    const errorBox = document.getElementById("error");
+    const content = document.getElementById("dashboard-content");
+
+    function setText(id, value, fallback = "Not provided") {
+        document.getElementById(id).textContent = value || fallback;
+    }
+
+    function renderTags(id, values, emptyMessage) {
+        const container = document.getElementById(id);
+        container.replaceChildren();
+        if (!Array.isArray(values) || values.length === 0) {
+            container.textContent = emptyMessage;
+            return;
+        }
+        values.forEach(value => {
+            const tag = document.createElement("span");
+            tag.className = "tag";
+            tag.textContent = value;
+            container.appendChild(tag);
+        });
+    }
+
+    function renderRecommendations(items) {
+        const list = document.getElementById("recommendation-list");
+        list.replaceChildren();
+        if (!items.length) {
+            const empty = document.createElement("p");
+            empty.className = "muted mb-0";
+            empty.textContent = "Add your interests and skills to see career paths worth exploring.";
+            list.appendChild(empty);
+            return;
+        }
+        items.forEach(item => {
+            const card = document.createElement("article");
+            card.className = "recommendation";
+            const titleRow = document.createElement("div");
+            titleRow.className = "d-flex justify-content-between align-items-center gap-2";
+            const title = document.createElement("h3");
+            title.className = "h6 fw-bold mb-0";
+            title.textContent = item.name;
+            const score = document.createElement("span");
+            score.className = "badge text-bg-primary";
+            score.textContent = `${item.match_percentage}% rule match`;
+            titleRow.append(title, score);
+            card.appendChild(titleRow);
+
+            const reasons = document.createElement("ul");
+            reasons.className = "small muted mt-3 mb-2";
+            item.reasons.forEach(reason => {
+                const entry = document.createElement("li");
+                entry.textContent = reason;
+                reasons.appendChild(entry);
+            });
+            card.appendChild(reasons);
+
+            const learn = document.createElement("p");
+            learn.className = "small mb-2";
+            learn.textContent = `Skills to explore: ${item.suggested_skills.join(", ")}`;
+            card.appendChild(learn);
+            const steps = document.createElement("p");
+            steps.className = "small muted mb-0";
+            steps.textContent = `Next steps: ${item.next_steps.join(" · ")}`;
+            card.appendChild(steps);
+            list.appendChild(card);
+        });
+    }
+
+    async function loadDashboard() {
+        try {
+            const response = await fetch("/api/v1/dash");
+            const result = await response.json();
+            if (response.status === 401) {
+                window.location.href = "/login";
+                return;
+            }
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || "Unable to load your dashboard.");
+            }
+            const user = result.user;
+            const profile = result.profile || {};
+            const description = profile.description || {};
+            const completion = profile.completion_percentage || 0;
+            setText("user-name", user.full_name);
+            setText("dropdown-name", user.full_name, "Account");
+            setText("user-email", user.email);
+            setText("verification-status", user.is_verified ? "Email verified" : "Email not verified");
+            setText("created-at", user.created_at ? `Member since ${new Date(user.created_at).toLocaleDateString()}` : "", "");
+            setText("education", description.education);
+            setText("interest-count", Array.isArray(description.interests) ? description.interests.length : 0, "0");
+            setText("skill-count", Array.isArray(description.skills) ? description.skills.length : 0, "0");
+            renderTags("subjects", description.subjects, "No subjects added.");
+            renderTags("interests", description.interests, "No interests added.");
+            renderTags("skills", description.skills, "No skills added.");
+            renderTags("careers", description.preferred_careers, "No careers selected.");
+            document.getElementById("completion-label").textContent = `${completion}%`;
+            document.getElementById("completion-bar").style.width = `${completion}%`;
+            document.getElementById("edit-profile").textContent = completion === 100 ? "Edit your profile" : "Complete your profile";
+            renderRecommendations(result.recommendations || []);
+            loading.classList.add("d-none");
+            content.classList.remove("d-none");
+        } catch (error) {
+            loading.classList.add("d-none");
+            errorBox.textContent = error.message;
+            errorBox.classList.remove("d-none");
+        }
+    }
+
+    document.getElementById("logout").addEventListener("click", async () => {
+        try {
+            const response = await fetch("/api/v1/auth/logout", { method: "POST" });
+            if (!response.ok) throw new Error("Unable to end your session. Please try again.");
+            window.location.href = "/login";
+        } catch (error) {
+            errorBox.textContent = error.message;
+            errorBox.classList.remove("d-none");
+        }
+    });
+
+    loadDashboard();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/careerpath.js"></script>
+</body>
+</html>

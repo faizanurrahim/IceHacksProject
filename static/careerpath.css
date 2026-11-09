@@ -1,0 +1,186 @@
+:root {
+    color-scheme: light;
+    --cp-bg: #f6f7fb;
+    --cp-surface: #ffffff;
+    --cp-text: #202437;
+    --cp-muted: #74758a;
+    --cp-border: #e7e9f0;
+    --cp-primary: #635bff;
+    --cp-shadow: 0 8px 35px rgba(0, 0, 0, .05);
+}
+
+html[data-theme="dark"] {
+    color-scheme: dark;
+    --cp-bg: #11131a;
+    --cp-surface: #1b1e28;
+    --cp-text: #eceef5;
+    --cp-muted: #a7adbd;
+    --cp-border: #303543;
+    --cp-primary: #a49cff;
+    --cp-shadow: 0 10px 35px rgba(0, 0, 0, .22);
+}
+
+body {
+    background-color: var(--cp-bg) !important;
+    color: var(--cp-text);
+    transition: background-color .2s ease, color .2s ease;
+}
+
+.navbar,
+.sidebar,
+.panel,
+.form-card,
+.signup-card,
+.login-card,
+.hero-visual,
+.career-preview,
+.feature-card,
+.dropdown-menu,
+.modal-content,
+.settings-card,
+.explore-card,
+.compare-panel,
+.compare-career,
+.roadmap-panel,
+.stage-card,
+.quiz-card,
+.result-card,
+.learning-card {
+    transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+}
+
+html[data-theme="dark"] body,
+html[data-theme="dark"] .navbar,
+html[data-theme="dark"] .sidebar,
+html[data-theme="dark"] .panel,
+html[data-theme="dark"] .form-card,
+html[data-theme="dark"] .signup-card,
+html[data-theme="dark"] .login-card,
+html[data-theme="dark"] .hero-visual,
+html[data-theme="dark"] .career-preview,
+html[data-theme="dark"] .feature-card,
+html[data-theme="dark"] .dropdown-menu,
+html[data-theme="dark"] .modal-content {
+    background-color: var(--cp-surface) !important;
+    color: var(--cp-text);
+    border-color: var(--cp-border) !important;
+}
+
+html[data-theme="dark"] .hero,
+html[data-theme="dark"] footer {
+    background: var(--cp-bg) !important;
+}
+
+html[data-theme="dark"] .text-muted,
+html[data-theme="dark"] .text-secondary,
+html[data-theme="dark"] .muted,
+html[data-theme="dark"] .subtitle,
+html[data-theme="dark"] .section-description {
+    color: var(--cp-muted) !important;
+}
+
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4,
+html[data-theme="dark"] h5,
+html[data-theme="dark"] h6,
+html[data-theme="dark"] label,
+html[data-theme="dark"] .nav-link {
+    color: var(--cp-text);
+}
+
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] .form-select,
+html[data-theme="dark"] .input-group .btn,
+html[data-theme="dark"] .input-group-text,
+html[data-theme="dark"] .form-check-input {
+    background-color: #141721;
+    color: var(--cp-text);
+    border-color: var(--cp-border);
+}
+
+html[data-theme="dark"] .navbar-toggler-icon {
+    filter: invert(1);
+}
+
+html[data-theme="dark"] .form-control::placeholder {
+    color: #858b9b;
+}
+
+html[data-theme="dark"] .form-control:focus,
+html[data-theme="dark"] .form-select:focus {
+    background-color: #141721;
+    color: var(--cp-text);
+}
+
+html[data-theme="dark"] .border,
+html[data-theme="dark"] hr {
+    border-color: var(--cp-border) !important;
+}
+
+html[data-theme="dark"] .nav-link.active,
+html[data-theme="dark"] .nav-link:hover,
+html[data-theme="dark"] .tag {
+    background-color: #302d50 !important;
+    color: #d3ceff !important;
+}
+
+html[data-theme="dark"] .bg-white {
+    background-color: var(--cp-surface) !important;
+}
+
+html[data-theme="dark"] .alert-success {
+    background-color: #173a2d;
+    color: #b8efd5;
+    border-color: #285d48;
+}
+
+html[data-theme="dark"] .alert-danger {
+    background-color: #421f27;
+    color: #ffd2d7;
+    border-color: #6d333e;
+}
+
+.careerpath-theme-toggle {
+    border: 1px solid var(--cp-border);
+    border-radius: 999px;
+    background: var(--cp-surface);
+    color: var(--cp-text);
+    width: 40px;
+    height: 40px;
+    display: inline-grid;
+    place-items: center;
+    margin-left: 12px;
+}
+
+.careerpath-theme-toggle:focus-visible {
+    outline: 3px solid var(--cp-primary);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body,
+    .navbar,
+    .sidebar,
+    .panel,
+    .form-card,
+    .signup-card,
+    .login-card,
+    .hero-visual,
+    .career-preview,
+    .feature-card,
+    .dropdown-menu,
+    .modal-content,
+    .settings-card,
+    .explore-card,
+    .compare-panel,
+    .compare-career,
+    .roadmap-panel,
+    .stage-card,
+    .quiz-card,
+    .result-card,
+    .learning-card {
+        transition: none;
+    }
+}

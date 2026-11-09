@@ -1,0 +1,428 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f6f7fb">
+
+    <title>Describe Yourself · CareerPath</title>
+    <link rel="stylesheet" href="/assets/careerpath.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <style>
+        body {
+            background: #f6f7fb;
+            color: #202437;
+            font-family: Arial, sans-serif;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e9eaf0;
+        }
+
+        .brand {
+            font-weight: 800;
+            color: #635bff;
+            font-size: 1.4rem;
+        }
+
+        .page-wrapper {
+            max-width: 850px;
+            margin: 45px auto;
+            padding: 0 18px;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 18px;
+            padding: 35px;
+            box-shadow: 0 8px 35px rgba(0, 0, 0, 0.04);
+        }
+
+        .section-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #eeedff;
+            color: #635bff;
+            margin-right: 10px;
+        }
+
+        .form-label {
+            font-weight: 600;
+        }
+
+        .form-control, .form-select {
+            padding: 12px 14px;
+            border-radius: 10px;
+            border-color: #e0e2ea;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #635bff;
+            box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.12);
+        }
+
+        .section {
+            padding: 24px 0;
+            border-bottom: 1px solid #eeeef2;
+        }
+
+        .section:last-of-type {
+            border-bottom: none;
+        }
+
+        .submit-btn {
+            background: #635bff;
+            border: none;
+            color: white;
+            padding: 13px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .submit-btn:hover {
+            background: #5148e5;
+            color: white;
+        }
+
+        .progress {
+            height: 7px;
+            border-radius: 20px;
+        }
+
+        .progress-bar {
+            background: #635bff;
+        }
+
+        @media (max-width: 576px) {
+            .form-card {
+                padding: 22px 17px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand brand" href="/get-started">
+            <i class="fa-solid fa-compass"></i> CareerPath
+        </a>
+
+        <span class="text-muted small">
+            Career discovery
+        </span>
+    </div>
+</nav>
+
+<main class="page-wrapper">
+
+    <div class="mb-4">
+        <span class="badge text-bg-primary mb-3">YOUR PROFILE</span>
+
+        <h2 class="fw-bold">Let's get to know you.</h2>
+
+        <p class="text-muted">
+            Tell us about your education, interests, and abilities.
+            We'll use your answers to help discover suitable career paths.
+        </p>
+
+        <div class="progress mt-3">
+            <div class="progress-bar" style="width: 100%"></div>
+        </div>
+    </div>
+
+    <div class="form-card">
+
+        <div id="message"></div>
+
+        <form id="descriptionForm">
+
+            <!-- EDUCATION -->
+            <div class="section">
+                <h5 class="fw-bold mb-3">
+                    <span class="section-icon">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </span>
+                    Education
+                </h5>
+
+                <label class="form-label" for="education">
+                    What is your current education level?
+                </label>
+
+                <select class="form-select" id="education" required>
+                    <option value="">Select your education level</option>
+                    <option>Middle School</option>
+                    <option>Grade 9</option>
+                    <option>Grade 10</option>
+                    <option>Grade 11</option>
+                    <option>Grade 12</option>
+                    <option>Intermediate</option>
+                    <option>Bachelor's Degree</option>
+                    <option>Master's Degree</option>
+                    <option>Doctorate</option>
+                    <option>Other</option>
+                </select>
+            </div>
+
+            <!-- SUBJECTS -->
+            <div class="section">
+                <h5 class="fw-bold mb-3">
+                    <span class="section-icon">
+                        <i class="fa-solid fa-book-open"></i>
+                    </span>
+                    Favourite Subjects
+                </h5>
+
+                <label class="form-label" for="subjects">
+                    Which subjects do you enjoy?
+                </label>
+
+                <input class="form-control"
+                       id="subjects"
+                       placeholder="Mathematics, Physics, Computer Science"
+                       required>
+
+                <small class="text-muted">
+                    Separate multiple subjects with commas.
+                </small>
+            </div>
+
+            <!-- INTERESTS -->
+            <div class="section">
+                <h5 class="fw-bold mb-3">
+                    <span class="section-icon">
+                        <i class="fa-solid fa-heart"></i>
+                    </span>
+                    Interests
+                </h5>
+
+                <label class="form-label" for="interests">
+                    What activities or topics interest you?
+                </label>
+
+                <textarea class="form-control"
+                          id="interests"
+                          rows="3"
+                          placeholder="Programming, Science, Technology, Art"
+                          required></textarea>
+
+                <small class="text-muted">
+                    Separate multiple interests with commas.
+                </small>
+            </div>
+
+            <!-- SKILLS -->
+            <div class="section">
+                <h5 class="fw-bold mb-3">
+                    <span class="section-icon">
+                        <i class="fa-solid fa-lightbulb"></i>
+                    </span>
+                    Skills
+                </h5>
+
+                <label class="form-label" for="skills">
+                    What are you good at?
+                </label>
+
+                <textarea class="form-control"
+                          id="skills"
+                          rows="3"
+                          placeholder="Problem solving, Communication, Python"
+                          required></textarea>
+
+                <small class="text-muted">
+                    Include technical and non-technical skills.
+                </small>
+            </div>
+
+            <!-- CAREERS -->
+            <div class="section">
+                <h5 class="fw-bold mb-3">
+                    <span class="section-icon">
+                        <i class="fa-solid fa-briefcase"></i>
+                    </span>
+                    Preferred Careers
+                </h5>
+
+                <label class="form-label" for="careers">
+                    Which careers are you considering?
+                </label>
+
+                <textarea class="form-control"
+                          id="careers"
+                          rows="3"
+                          placeholder="Software Developer, AI Engineer, Doctor"
+                          required></textarea>
+
+                <small class="text-muted">
+                    You can enter multiple careers, or write "Not sure yet".
+                </small>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
+
+                <span class="text-muted small">
+                    <i class="fa-solid fa-lock"></i>
+                    Your information stays associated with your account.
+                </span>
+
+                <button type="submit"
+                        class="btn submit-btn"
+                        id="submitBtn">
+                    Save & Continue
+                    <i class="fa-solid fa-arrow-right ms-2"></i>
+                </button>
+
+            </div>
+
+        </form>
+    </div>
+</main>
+
+<script>
+    const form = document.getElementById("descriptionForm");
+    const message = document.getElementById("message");
+    const submitBtn = document.getElementById("submitBtn");
+    const formControls = form.querySelectorAll("input, textarea, select, button");
+    formControls.forEach(control => { control.disabled = true; });
+
+    function showMessage(text, type) {
+        message.replaceChildren();
+        const alert = document.createElement("div");
+        alert.className = `alert alert-${type}`;
+        alert.textContent = text;
+        message.appendChild(alert);
+    }
+
+    function getList(id) {
+        return document.getElementById(id)
+            .value
+            .split(",")
+            .map(item => item.trim())
+            .filter(item => item.length > 0);
+    }
+
+    form.addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const description = [
+            {
+                field: "education",
+                value: document.getElementById("education").value
+            },
+            {
+                field: "subjects",
+                value: getList("subjects")
+            },
+            {
+                field: "interests",
+                value: getList("interests")
+            },
+            {
+                field: "skills",
+                value: getList("skills")
+            },
+            {
+                field: "preferred_careers",
+                value: getList("careers")
+            }
+        ];
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Saving...
+        `;
+
+        message.innerHTML = "";
+
+        try {
+            const response = await fetch("/api/v1/discription", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    description: description
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(
+                    result.error || result.detail || result.message ||
+                    "Unable to save your profile."
+                );
+            }
+
+            showMessage("Your career profile is saved. Redirecting to your dashboard...", "success");
+
+            // Redirect after successful profile submission.
+            setTimeout(() => {
+                window.location.href = "/dashboard";
+            }, 1000);
+
+        } catch (error) {
+            showMessage(error.message, "danger");
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `
+                Save & Continue
+                <i class="fa-solid fa-arrow-right ms-2"></i>
+            `;
+        }
+    });
+
+    async function loadProfile() {
+        try {
+            const response = await fetch("/api/v1/profile");
+            const result = await response.json();
+            if (response.status === 401) {
+                window.location.href = "/login";
+                return;
+            }
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || "Unable to load your saved profile.");
+            }
+            const profile = result.profile || {};
+            if (profile.education) document.getElementById("education").value = profile.education;
+            for (const [field, input] of Object.entries({
+                subjects: "subjects",
+                interests: "interests",
+                skills: "skills",
+                preferred_careers: "careers"
+            })) {
+                if (Array.isArray(profile[field])) {
+                    document.getElementById(input).value = profile[field].join(", ");
+                }
+            }
+            if (result.completed) {
+                submitBtn.innerHTML = 'Update Profile <i class="fa-solid fa-arrow-right ms-2"></i>';
+            }
+            formControls.forEach(control => { control.disabled = false; });
+        } catch (error) {
+            showMessage(error.message, "danger");
+        }
+    }
+
+    loadProfile();
+</script>
+
+<script src="/assets/careerpath.js"></script>
+</body>
+</html>
