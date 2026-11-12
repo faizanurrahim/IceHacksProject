@@ -12,6 +12,8 @@ from config.careers import careers
 class CareerCatalogTests(unittest.TestCase):
     def test_every_existing_career_has_a_complete_public_roadmap(self):
         catalog = get_career_catalog()
+        self.assertEqual(len(catalog), 65)
+        self.assertEqual({career["id"] for career in catalog}, set(range(1, 66)))
         self.assertEqual({career["name"] for career in catalog}, set(careers))
         self.assertEqual({career["id"] for career in catalog}, set(careers.values()))
 
@@ -46,13 +48,13 @@ class CareerCatalogTests(unittest.TestCase):
             "skills": ["Programming", "Problem solving"],
             "work_styles": ["analytical", "creative"],
         }
-        results = quiz_recommendations(answers)
+        results = quiz_recommendations(answers, limit=10)
         developer = next(result for result in results if result["name"] == "Software Developer")
 
         self.assertIn("This role can include your preferred work style: Analytical, Creative", developer["reasons"])
         self.assertEqual(developer["match_percentage"], developer["score"])
         self.assertTrue(all(0 <= result["score"] <= 100 for result in results))
-        self.assertEqual(len(results), 5)
+        self.assertEqual(len(results), 10)
 
 
 if __name__ == "__main__":

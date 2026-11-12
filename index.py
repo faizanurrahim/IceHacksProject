@@ -6,7 +6,7 @@ from routes.description import description_api
 from routes.dashboard import dashboard_api
 from routes.careers import career_explorer_api
 from routes.learning import learning_api
-app = Nserver(__name__)
+app = Nserver(__name__,debug=True)
 app.route("/")(lambda:render_template("index.html"))
 app.register_blueprint(description_api)
 app.register_blueprint(api)

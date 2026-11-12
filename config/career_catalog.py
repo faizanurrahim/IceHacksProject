@@ -4,13 +4,15 @@ from config.recommendations import CAREER_SIGNALS, recommend_careers
 CAREER_CATEGORIES = {
     "Healthcare & Life Science": (
         "Doctor", "Pharmacist", "Nurse", "Surgeon", "Dentist",
-        "Veterinarian", "Psychologist",
+        "Veterinarian", "Psychologist", "Paramedic", "Public Health Analyst",
+        "Forensic Scientist",
     ),
     "Technology": (
         "Software Developer", "Web Developer", "Data Scientist",
         "AI Engineer", "Machine Learning Engineer", "Cybersecurity Analyst",
         "Network Engineer", "Database Administrator", "Robotics Engineer",
-        "Game Developer",
+        "Game Developer", "Cloud Architect", "DevOps Engineer", "Data Analyst",
+        "Product Manager", "UX Researcher",
     ),
     "Engineering & Built Environment": (
         "Engineer", "Architect", "Civil Engineer", "Mechanical Engineer",
@@ -19,14 +21,19 @@ CAREER_CATEGORIES = {
     "Education & Research": ("Teacher", "Professor", "Scientist", "Researcher"),
     "Business & Finance": (
         "Accountant", "Financial Analyst", "Economist", "Business Manager",
-        "Entrepreneur", "Digital Marketer",
+        "Entrepreneur", "Digital Marketer", "Human Resources Manager",
+        "Supply Chain Analyst",
     ),
-    "Law & Public Service": ("Lawyer", "Judge", "Police Officer"),
+    "Law & Public Service": ("Lawyer", "Judge", "Police Officer", "Social Worker"),
     "Creative & Media": (
         "Journalist", "Writer", "Graphic Designer", "UI/UX Designer",
         "Photographer", "Filmmaker", "Animator", "Fashion Designer",
+        "Content Creator",
     ),
-    "Environment & Outdoors": ("Environmental Scientist", "Marine Biologist", "Sports Coach"),
+    "Environment & Outdoors": (
+        "Environmental Scientist", "Marine Biologist", "Sports Coach",
+        "Geologist", "Renewable Energy Engineer", "Urban Planner",
+    ),
     "Skilled Trades & Hospitality": ("Chef", "Electrician"),
 }
 
@@ -81,6 +88,21 @@ CAREER_SUMMARIES = {
     "Environmental Scientist": "Study environmental conditions and help assess human impacts.",
     "Marine Biologist": "Study ocean life and ecosystems using field and laboratory methods.",
     "Sports Coach": "Help athletes practice skills, work as a team, and develop safely.",
+    "Cloud Architect": "Design secure, scalable cloud systems that meet an organization's technical needs.",
+    "DevOps Engineer": "Automate software delivery and help teams operate reliable services.",
+    "Data Analyst": "Turn datasets into clear findings that help people make informed decisions.",
+    "Product Manager": "Coordinate user needs, product goals, and delivery with a cross-functional team.",
+    "UX Researcher": "Study user needs and behavior to help teams make more usable products.",
+    "Social Worker": "Support people and communities in accessing services and navigating challenges.",
+    "Paramedic": "Provide urgent pre-hospital care and coordinate safe transfer to medical services.",
+    "Public Health Analyst": "Analyze population health information to support community health decisions.",
+    "Geologist": "Study Earth's materials and processes through fieldwork, samples, and analysis.",
+    "Renewable Energy Engineer": "Design and evaluate systems that generate or store energy from renewable sources.",
+    "Urban Planner": "Help communities plan land use, transport, housing, and public spaces.",
+    "Human Resources Manager": "Support hiring, employee development, workplace policies, and people operations.",
+    "Supply Chain Analyst": "Use data to improve how goods are sourced, moved, stored, and delivered.",
+    "Content Creator": "Plan and produce useful or entertaining media for a defined audience.",
+    "Forensic Scientist": "Examine evidence using validated scientific methods and document findings carefully.",
 }
 
 CATEGORY_RESPONSIBILITIES = {
@@ -191,6 +213,21 @@ CAREER_STYLES = {
     "Environmental Scientist": ("analytical", "hands_on", "independent"),
     "Marine Biologist": ("analytical", "hands_on", "independent"),
     "Sports Coach": ("people", "hands_on", "structured"),
+    "Cloud Architect": ("analytical", "structured", "independent"),
+    "DevOps Engineer": ("analytical", "hands_on", "structured"),
+    "Data Analyst": ("analytical", "structured", "independent"),
+    "Product Manager": ("people", "analytical", "creative"),
+    "UX Researcher": ("people", "analytical", "creative"),
+    "Social Worker": ("people", "structured", "independent"),
+    "Paramedic": ("people", "hands_on", "structured"),
+    "Public Health Analyst": ("analytical", "people", "structured"),
+    "Geologist": ("analytical", "hands_on", "independent"),
+    "Renewable Energy Engineer": ("analytical", "hands_on", "creative"),
+    "Urban Planner": ("people", "analytical", "creative"),
+    "Human Resources Manager": ("people", "structured", "analytical"),
+    "Supply Chain Analyst": ("analytical", "structured", "independent"),
+    "Content Creator": ("creative", "independent", "people"),
+    "Forensic Scientist": ("analytical", "structured", "independent"),
 }
 
 RESOURCE_CATALOG = {

@@ -1,32 +1,45 @@
 (function () {
     const preferenceKey = "careerpath-theme";
+    const themes = ["light", "dark", "special"];
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const savedTheme = localStorage.getItem(preferenceKey);
-    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
+
+    function resolvedTheme(theme) {
+        return theme === "system" ? (mediaQuery.matches ? "dark" : "light") : theme;
+    }
 
     function applyTheme(theme) {
-        if (theme === "system") {
-            theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-        }
+        const selectedTheme = themes.includes(theme) ? theme : "system";
+        theme = resolvedTheme(selectedTheme);
         document.documentElement.dataset.theme = theme;
+        document.documentElement.dataset.themePreference = selectedTheme;
         const toggle = document.getElementById("careerpathThemeToggle");
         if (toggle) {
-            toggle.innerHTML = theme === "dark"
-                ? '<i class="fa-solid fa-sun" aria-hidden="true"></i>'
-                : '<i class="fa-solid fa-moon" aria-hidden="true"></i>';
-            toggle.setAttribute("aria-label", `Switch to ${theme === "dark" ? "light" : "dark"} theme`);
-            toggle.title = `Switch to ${theme === "dark" ? "light" : "dark"} theme`;
+            const nextTheme = themes[(themes.indexOf(theme) + 1) % themes.length];
+            const labels = {
+                light: "Light: white and purple",
+                dark: "Dark: black and blue",
+                special: "Special edition: dark blue and purple"
+            };
+            const icons = {
+                light: "fa-sun",
+                dark: "fa-moon",
+                special: "fa-wand-magic-sparkles"
+            };
+            toggle.innerHTML = `<i class="fa-solid ${icons[theme]}" aria-hidden="true"></i>`;
+            toggle.setAttribute("aria-label", `${labels[theme]}. Switch to ${labels[nextTheme]}`);
+            toggle.title = `Current: ${labels[theme]}. Next: ${labels[nextTheme]}`;
         }
     }
 
     window.careerpathSetTheme = function (theme) {
-        if (theme === "system") localStorage.removeItem(preferenceKey);
-        else localStorage.setItem(preferenceKey, theme);
-        applyTheme(theme === "system" ? systemTheme : theme);
+        const selectedTheme = themes.includes(theme) ? theme : "system";
+        if (selectedTheme === "system") localStorage.removeItem(preferenceKey);
+        else localStorage.setItem(preferenceKey, selectedTheme);
+        applyTheme(selectedTheme);
     };
 
-    applyTheme(savedTheme || systemTheme);
+    applyTheme(savedTheme || "system");
 
     document.addEventListener("DOMContentLoaded", function () {
         const host = document.querySelector("nav .container") || document.querySelector(".sidebar");
@@ -37,11 +50,15 @@
         toggle.className = "careerpath-theme-toggle";
         toggle.setAttribute("aria-label", "Switch theme");
         host.appendChild(toggle);
-        applyTheme(document.documentElement.dataset.theme);
+        applyTheme(localStorage.getItem(preferenceKey) || "system");
         toggle.addEventListener("click", function () {
-            const theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-            localStorage.setItem(preferenceKey, theme);
-            applyTheme(theme);
+            const currentTheme = document.documentElement.dataset.theme;
+            const nextTheme = themes[(themes.indexOf(currentTheme) + 1) % themes.length];
+            window.careerpathSetTheme(nextTheme);
         });
+    });
+
+    mediaQuery.addEventListener("change", function () {
+        if (!localStorage.getItem(preferenceKey)) applyTheme("system");
     });
 })();

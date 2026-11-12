@@ -51,6 +51,21 @@ CAREER_SIGNALS = {
     "Environmental Scientist": (("biology", "chemistry", "geography"), ("environment", "science", "conservation"), ("research", "analysis", "problem solving"), ("field research", "environmental sampling", "gis"), "undergraduate"),
     "Marine Biologist": (("biology", "chemistry", "oceanography"), ("marine life", "animals", "conservation"), ("research", "observation", "analysis"), ("marine ecology", "field research", "data analysis"), "undergraduate"),
     "Sports Coach": (("physical education", "biology"), ("sports", "teaching", "fitness"), ("communication", "leadership", "motivation"), ("training plans", "sports science", "first aid"), "school"),
+    "Cloud Architect": (("computer science", "math"), ("cloud computing", "technology", "infrastructure"), ("systems thinking", "problem solving", "communication"), ("cloud platforms", "distributed systems", "security architecture"), "undergraduate"),
+    "DevOps Engineer": (("computer science", "math"), ("automation", "technology", "infrastructure"), ("programming", "problem solving", "teamwork"), ("continuous integration", "cloud platforms", "monitoring"), "school"),
+    "Data Analyst": (("math", "statistics", "computer science"), ("data", "business", "patterns"), ("analysis", "statistics", "communication"), ("sql", "spreadsheets", "data visualization"), "school"),
+    "Product Manager": (("business", "computer science", "english"), ("product design", "technology", "leadership"), ("communication", "research", "planning"), ("product strategy", "user research", "prioritization"), "school"),
+    "UX Researcher": (("psychology", "design", "english"), ("user experience", "research", "helping people"), ("listening", "analysis", "communication"), ("interviewing", "usability testing", "research ethics"), "undergraduate"),
+    "Social Worker": (("psychology", "sociology", "english"), ("community", "helping people", "social justice"), ("empathy", "communication", "organization"), ("case management", "advocacy", "community resources"), "undergraduate"),
+    "Paramedic": (("biology", "health science"), ("health", "emergency response", "helping people"), ("calm under pressure", "teamwork", "communication"), ("first aid", "emergency care", "patient assessment"), "school"),
+    "Public Health Analyst": (("biology", "statistics", "math"), ("health", "research", "community"), ("analysis", "communication", "problem solving"), ("epidemiology", "data analysis", "health policy"), "undergraduate"),
+    "Geologist": (("geography", "chemistry", "physics"), ("earth science", "environment", "field work"), ("observation", "analysis", "problem solving"), ("field mapping", "mineral identification", "geospatial analysis"), "undergraduate"),
+    "Renewable Energy Engineer": (("math", "physics", "environmental science"), ("renewable energy", "technology", "environment"), ("problem solving", "design", "analysis"), ("energy systems", "electrical fundamentals", "sustainability"), "undergraduate"),
+    "Urban Planner": (("geography", "math", "art"), ("cities", "community", "environment"), ("planning", "communication", "research"), ("land-use planning", "gis", "community engagement"), "undergraduate"),
+    "Human Resources Manager": (("business", "psychology", "english"), ("people", "leadership", "workplace culture"), ("communication", "empathy", "organization"), ("recruitment", "employment practices", "conflict resolution"), "undergraduate"),
+    "Supply Chain Analyst": (("math", "business", "economics"), ("logistics", "data", "planning"), ("analysis", "organization", "problem solving"), ("inventory planning", "spreadsheet analysis", "logistics systems"), "undergraduate"),
+    "Content Creator": (("art", "english", "computer science"), ("storytelling", "video", "social media"), ("creativity", "communication", "planning"), ("content strategy", "video editing", "audience analytics"), "school"),
+    "Forensic Scientist": (("biology", "chemistry", "math"), ("science", "investigation", "justice"), ("attention to detail", "analysis", "writing"), ("evidence handling", "laboratory methods", "scientific reporting"), "undergraduate"),
 }
 
 EDUCATION_LEVELS = {

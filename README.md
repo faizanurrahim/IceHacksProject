@@ -4,6 +4,8 @@ CareerPath is a career exploration app built on Nexa.py, PyMongo, Argon2, JWT, a
 
 Visitors can explore the existing career catalog, take a career finder quiz, view free learning roadmaps, and compare careers without registering. Accounts are optional and add career favorites, saved roadmaps, skill progress, and saved quiz-result history.
 
+The interface includes three saved appearance choices: light (white and purple), dark (black and blue), and special edition (dark blue and purple). The navigation theme button cycles between the three; Settings also offers system-preference mode.
+
 ## Run locally
 
 The project expects Nexa.py and its Python dependencies to be installed in the selected virtual environment. For the current workstation:
@@ -47,7 +49,7 @@ Responses are JSON. Errors have `success: false`, `error`, and `statusCDE`.
 | PUT | `/api/v1/profile` | Yes | Update profile |
 | GET or POST | `/api/v1/dash` | Yes | Dashboard data (POST retains legacy token-body support) |
 | GET | `/api/v1/recommendations` | Yes | Rule-based career matches |
-| GET | `/api/v1/explore/careers?search=<text>&category=<category>` | No | Search/filter the detailed 50-career catalog |
+| GET | `/api/v1/explore/careers?search=<text>&category=<category>` | No | Search/filter the detailed 65-career catalog |
 | GET | `/api/v1/career/<id>/roadmap` | No | Career detail, education, skills, staged roadmap, projects, and free resources |
 | POST | `/api/v1/careers/compare` | No | Compare 2–4 careers using `{"career_ids":[1,2]}` |
 | POST | `/api/v1/career-quiz` | No | Rule-based recommendations; expects `education`, and 1–12 values each for `subjects`, `interests`, `skills`, and `work_styles` |

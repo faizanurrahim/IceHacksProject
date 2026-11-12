@@ -48,5 +48,20 @@ careers = {
     "Fashion Designer": 47,
     "Environmental Scientist": 48,
     "Marine Biologist": 49,
-    "Sports Coach": 50
+    "Sports Coach": 50,
+    "Cloud Architect": 51,
+    "DevOps Engineer": 52,
+    "Data Analyst": 53,
+    "Product Manager": 54,
+    "UX Researcher": 55,
+    "Social Worker": 56,
+    "Paramedic": 57,
+    "Public Health Analyst": 58,
+    "Geologist": 59,
+    "Renewable Energy Engineer": 60,
+    "Urban Planner": 61,
+    "Human Resources Manager": 62,
+    "Supply Chain Analyst": 63,
+    "Content Creator": 64,
+    "Forensic Scientist": 65
 }
