@@ -44,9 +44,14 @@
     <a href="/explore" class="nav-link"><i class="fa-solid fa-compass me-2"></i>Career Explorer</a>
     <a href="/settings" class="nav-link"><i class="fa-solid fa-gear me-2"></i>Settings</a>
     <hr class="my-4">
-    <button class="nav-link border-0 bg-transparent w-100 text-start" id="logout">
+    {% if IS_LOGGED_IN %}
+    <button class="nav-link border-0 bg-transparent w-100 text-start" id="logout" data-auth-logout>
         <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
     </button>
+    {% else %}
+    <a href="/login" class="nav-link">Log in</a>
+    <a href="/get-started" class="nav-link">Sign up</a>
+    {% end if %}
 </aside>
 
 <main class="main">
@@ -124,7 +129,7 @@
             <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
                 <div>
                     <h2 class="h5 fw-bold mb-1">Career paths to explore</h2>
-                    <p class="muted small mb-0">Rule-based matches from your profile, not a prediction of career success.</p>
+                    <p class="muted small mb-0" id="recommendation-engine-note">Profile-based ideas for exploration, not a prediction of career success.</p>
                 </div>
                 <a class="btn btn-sm btn-outline-primary" href="/describe-yourself">Update profile</a>
             </div>
@@ -164,9 +169,14 @@
         });
     }
 
-    function renderRecommendations(items) {
+    function renderRecommendations(items, engine) {
         const list = document.getElementById("recommendation-list");
+        const note = document.getElementById("recommendation-engine-note");
         list.replaceChildren();
+        note.textContent = engine && engine.mode === "hybrid"
+            ? "A transparent profile match combined with a local ranking signal from opted-in feedback. Scores are not probabilities."
+            : "Transparent profile-signal matches, personalized with your saved preferences when available.";
+        if (engine && engine.notice) note.textContent += " " + engine.notice;
         if (!items.length) {
             const empty = document.createElement("p");
             empty.className = "muted mb-0";
@@ -184,9 +194,14 @@
             title.textContent = item.name;
             const score = document.createElement("span");
             score.className = "badge text-bg-primary";
-            score.textContent = `${item.match_percentage}% rule match`;
+            score.textContent = `${item.match_percentage}% exploration score`;
+            score.setAttribute("aria-label", `Exploration score: ${item.match_percentage} percent`);
             titleRow.append(title, score);
             card.appendChild(titleRow);
+            const confidence = document.createElement("p");
+            confidence.className = "small muted mt-2 mb-0";
+            confidence.textContent = `Heuristic confidence: ${item.confidence || "limited"}; uncertainty ${item.uncertainty ?? 1}. Not a probability.`;
+            card.appendChild(confidence);
 
             const reasons = document.createElement("ul");
             reasons.className = "small muted mt-3 mb-2";
@@ -199,11 +214,11 @@
 
             const learn = document.createElement("p");
             learn.className = "small mb-2";
-            learn.textContent = `Skills to explore: ${item.suggested_skills.join(", ")}`;
+            learn.textContent = `Skills to explore: ${(item.suggested_skills || []).join(", ") || "Explore the career roadmap for learning ideas."}`;
             card.appendChild(learn);
             const steps = document.createElement("p");
             steps.className = "small muted mb-0";
-            steps.textContent = `Next steps: ${item.next_steps.join(" · ")}`;
+            steps.textContent = `Next steps: ${(item.next_steps || []).join(" · ")}`;
             card.appendChild(steps);
             list.appendChild(card);
         });
@@ -239,7 +254,7 @@
             document.getElementById("completion-label").textContent = `${completion}%`;
             document.getElementById("completion-bar").style.width = `${completion}%`;
             document.getElementById("edit-profile").textContent = completion === 100 ? "Edit your profile" : "Complete your profile";
-            renderRecommendations(result.recommendations || []);
+            renderRecommendations(result.recommendations || [], result.recommendation_engine);
             loading.classList.add("d-none");
             content.classList.remove("d-none");
         } catch (error) {
@@ -248,17 +263,6 @@
             errorBox.classList.remove("d-none");
         }
     }
-
-    document.getElementById("logout").addEventListener("click", async () => {
-        try {
-            const response = await fetch("/api/v1/auth/logout", { method: "POST" });
-            if (!response.ok) throw new Error("Unable to end your session. Please try again.");
-            window.location.href = "/login";
-        } catch (error) {
-            errorBox.textContent = error.message;
-            errorBox.classList.remove("d-none");
-        }
-    });
 
     loadDashboard();
 </script>

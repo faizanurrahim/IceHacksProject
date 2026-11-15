@@ -23,7 +23,13 @@
             <a class="nav-link d-none d-sm-inline" href="/explore">Explore careers</a>
             <a class="nav-link d-none d-sm-inline" href="/compare">Compare</a>
             <a class="nav-link d-none d-sm-inline" href="/my-learning">My learning</a>
+            {% if IS_LOGGED_IN %}
+            <a class="nav-link" href="/dashboard">Dashboard</a>
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-auth-logout>Logout</button>
+            {% else %}
             <a class="nav-link" href="/login">Log in</a>
+            <a class="nav-link" href="/get-started">Sign up</a>
+            {% end if %}
         </div>
     </div>
 </nav>
@@ -36,13 +42,36 @@
     <div id="quiz-error" class="alert alert-danger d-none" role="alert"></div>
     <form id="career-quiz-form" class="quiz-card">
         <div class="mb-4">
-            <label for="education" class="form-label fw-semibold">1. What is your current education level?</label>
-            <select id="education" class="form-select" required>
-                <option value="">Choose one</option><option>Middle School</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option><option>Intermediate</option><option>Bachelor's Degree</option><option>Master's Degree</option><option>Doctorate</option>
+            <label for="education" class="form-label fw-semibold">1. What is your current education level? <span class="text-muted fw-normal">(optional)</span></label>
+            <select id="education" class="form-select">
+                <option value="">Choose one (optional)</option><option>Middle School</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option><option>Intermediate</option><option>Bachelor's Degree</option><option>Master's Degree</option><option>Doctorate</option>
             </select>
         </div>
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label for="country" class="form-label fw-semibold">Where do you plan to study or work?</label>
+                <select id="country" class="form-select" required>
+                    <option value="">Choose a country</option>
+                    <option>Pakistan</option>
+                    <option>India</option>
+                    <option>United States</option>
+                    <option>United Kingdom</option>
+                    <option>Canada</option>
+                    <option>Australia</option>
+                    <option>Other / not listed</option>
+                </select>
+                <div class="form-text">Country guidance is general; check current requirements with local institutions and regulators.</div>
+            </div>
+            <div class="col-md-6">
+                <label for="preferred-career" class="form-label fw-semibold">Do you have a dream career? <span class="text-muted fw-normal">(optional)</span></label>
+                <select id="preferred-career" class="form-select">
+                    <option value="">No preference yet</option>
+                </select>
+                <div class="form-text">Your choice gets a modest preference boost, while subject and skill matches still count.</div>
+            </div>
+        </div>
         <fieldset class="mb-4">
-            <legend class="form-label fw-semibold">2. Which subjects would you like to learn more about? <span class="text-muted fw-normal">(choose up to 5)</span></legend>
+            <legend class="form-label fw-semibold">2. Which subjects would you like to learn more about? <span class="text-muted fw-normal">(optional, choose up to 5)</span></legend>
             <div class="option-grid" data-options="subjects">
                 <label class="choice"><input class="form-check-input me-2" type="checkbox" value="Mathematics">Mathematics</label>
                 <label class="choice"><input class="form-check-input me-2" type="checkbox" value="Computer Science">Computer science</label>
@@ -59,7 +88,7 @@
             </div>
         </fieldset>
         <fieldset class="mb-4">
-            <legend class="form-label fw-semibold">3. What kinds of things interest you? <span class="text-muted fw-normal">(choose up to 5)</span></legend>
+            <legend class="form-label fw-semibold">3. What kinds of things interest you? <span class="text-muted fw-normal">(optional, choose up to 5)</span></legend>
             <div class="option-grid" data-options="interests">
                 <label class="choice"><input class="form-check-input me-2" type="checkbox" value="Technology and programming">Technology & programming</label>
                 <label class="choice"><input class="form-check-input me-2" type="checkbox" value="Health and helping people">Health & helping people</label>
@@ -76,7 +105,7 @@
             </div>
         </fieldset>
         <fieldset class="mb-4">
-            <legend class="form-label fw-semibold">4. Which skills would you enjoy practicing? <span class="text-muted fw-normal">(choose up to 5)</span></legend>
+            <legend class="form-label fw-semibold">4. Which skills would you enjoy practicing? <span class="text-muted fw-normal">(optional, choose up to 5)</span></legend>
             <div class="option-grid" data-options="skills">
                 <label class="choice"><input class="form-check-input me-2" type="checkbox" value="Problem solving">Problem solving</label>
                 <label class="choice"><input class="form-check-input me-2" type="checkbox" value="Communication">Communication</label>
@@ -90,7 +119,7 @@
             </div>
         </fieldset>
         <fieldset class="mb-4">
-            <legend class="form-label fw-semibold">5. What work style sounds most appealing? <span class="text-muted fw-normal">(choose up to 3)</span></legend>
+            <legend class="form-label fw-semibold">5. What work style sounds most appealing? <span class="text-muted fw-normal">(optional, choose up to 3)</span></legend>
             <div class="option-grid" data-options="work_styles">
                 <label class="choice"><input class="form-check-input me-2" type="checkbox" value="people">Working with people</label>
                 <label class="choice"><input class="form-check-input me-2" type="checkbox" value="analytical">Analyzing questions and evidence</label>
@@ -103,11 +132,89 @@
         <button class="btn btn-primary btn-lg" id="quiz-submit" type="submit"><i class="fa-solid fa-wand-magic-sparkles me-2"></i>Show my career ideas</button>
     </form>
     <section id="quiz-results" class="mt-4 d-none" aria-live="polite">
+        <div id="country-guidance" class="alert alert-info d-none" role="note"></div>
         <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
             <div><h2 class="h3 fw-bold">Your paths to explore</h2><p class="text-muted mb-0">Each match shows which answers contributed. You can retake this quiz any time.</p></div>
             <button type="button" class="btn btn-outline-primary" id="save-quiz-result"><i class="fa-regular fa-bookmark me-2"></i>Save results</button>
         </div>
         <div id="quiz-recommendations" class="row g-3"></div>
+        <p id="recommendation-engine-note" class="small text-muted mt-3"></p>
+        <section id="follow-up-panel" class="result-card mt-3 d-none" aria-live="polite">
+            <h3 class="h5 fw-bold" id="follow-up-prompt"></h3>
+            <p class="small text-muted" id="follow-up-why"></p>
+            <div id="follow-up-choices" class="d-flex flex-wrap gap-2"></div>
+            <button type="button" class="btn btn-link btn-sm px-0 mt-2" id="skip-follow-up">Skip this question</button>
+        </section>
+        <form id="recommendation-feedback-form" class="result-card mt-3">
+            <h3 class="h5 fw-bold">Help make your next suggestions more personal</h3>
+            <p class="small text-muted">Feedback can shape future suggestions for your account. You can optionally consent to its de-identified use in future offline model evaluation. Exploring careers does not require an account.</p>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="overall-feedback">How relevant were these ideas?</label>
+                    <select class="form-select" id="overall-feedback" required>
+                        <option value="">Choose one</option>
+                        <option value="suitable">Mostly suitable</option>
+                        <option value="some_relevant">Some were relevant</option>
+                        <option value="not_suitable">Not a good fit</option>
+                        <option value="different_career">I have another career in mind</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="feedback-reason">What influenced your answer?</label>
+                    <select class="form-select" id="feedback-reason" required>
+                        <option value="">Choose one</option>
+                        <option value="unrelated">The suggestions felt unrelated</option>
+                        <option value="missing_skills">The skills did not match</option>
+                        <option value="education_path">The education path did not fit</option>
+                        <option value="work_style">The work style did not fit</option>
+                        <option value="other">Something else</option>
+                    </select>
+                </div>
+            </div>
+            <fieldset class="mt-3">
+                <legend class="form-label">For each suggestion, select your reaction</legend>
+                <div id="career-feedback-options" class="d-grid gap-2"></div>
+            </fieldset>
+            <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                    <label class="form-label" for="feedback-alternate-career">Another career you are interested in (optional)</label>
+                    <select class="form-select" id="feedback-alternate-career">
+                        <option value="">No other career</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="feedback-work-style">Work style you would prefer (optional)</label>
+                    <select class="form-select" id="feedback-work-style">
+                        <option value="">No additional preference</option>
+                        <option value="people">Working with people</option>
+                        <option value="analytical">Analyzing questions and evidence</option>
+                        <option value="hands_on">Making or fixing things</option>
+                        <option value="creative">Creating and designing</option>
+                        <option value="structured">Following plans and details</option>
+                        <option value="independent">Working independently</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-3">
+                <label class="form-label" for="feedback-priority">What matters most in your work? (optional)</label>
+                <select class="form-select" id="feedback-priority">
+                    <option value="">No additional priority</option>
+                    <option value="creative_work">Creative work</option>
+                    <option value="helping_people">Helping people</option>
+                    <option value="analytical_work">Analytical problem-solving</option>
+                    <option value="hands_on_work">Hands-on work</option>
+                    <option value="independence">Independence</option>
+                    <option value="structured_work">Structured, detail-oriented work</option>
+                </select>
+            </div>
+            <div class="form-check mt-3">
+                <input class="form-check-input" type="checkbox" id="feedback-training-consent">
+                <label class="form-check-label small" for="feedback-training-consent">I consent to de-identified use of this feedback in offline recommendation training and evaluation. This is optional and can be left unchecked.</label>
+            </div>
+            <button class="btn btn-outline-primary mt-3" type="submit" id="submit-recommendation-feedback">Share feedback</button>
+            <button class="btn btn-outline-danger mt-3 ms-2" type="button" id="withdraw-training-consent">Withdraw training consent</button>
+            <p id="recommendation-feedback-message" class="small mt-2 mb-0" role="status"></p>
+        </form>
         <p id="save-result-message" class="small mt-3" role="status"></p>
         <button class="btn btn-link mt-2" id="retake-quiz" type="button">Retake the quiz</button>
     </section>

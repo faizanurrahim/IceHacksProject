@@ -85,7 +85,12 @@ class CareerRecommendationTests(unittest.TestCase):
         results = recommend_careers(profile)
         self.assertEqual(results[0]["name"], "Software Developer")
         self.assertEqual(results[0]["id"], careers["Software Developer"])
-        self.assertEqual(results[0]["match_percentage"], 100)
+        self.assertGreater(results[0]["match_percentage"], 0)
+        self.assertLess(results[0]["match_percentage"], 100)
+        self.assertTrue(results[0]["matched_interests"])
+        self.assertTrue(results[0]["matched_subjects"])
+        self.assertTrue(results[0]["matched_skills"])
+        self.assertTrue(results[0]["preferred_career"])
         self.assertTrue(results[0]["reasons"])
         self.assertTrue(results[0]["suggested_skills"])
         self.assertTrue(results[0]["next_steps"])
@@ -101,6 +106,83 @@ class CareerRecommendationTests(unittest.TestCase):
         scores = [item["score"] for item in results]
         self.assertEqual(scores, sorted(scores, reverse=True))
         self.assertTrue(all(0 <= score <= 100 for score in scores))
+        self.assertTrue(all(
+            item["matched_subjects"] or item["matched_interests"] or item["matched_skills"]
+            or item["preferred_career"]
+            for item in results
+        ))
+
+    def test_returns_no_careers_for_education_alone(self):
+        self.assertEqual(recommend_careers({"education": "Grade 12"}), [])
+
+    def test_dream_career_is_included_and_explains_mismatched_answers(self):
+        results = recommend_careers({
+            "education": "Grade 12",
+            "subjects": ["Mathematics"],
+            "interests": ["Technology"],
+            "skills": ["Programming"],
+            "preferred_careers": ["Doctor"],
+        })
+        doctor = next(item for item in results if item["name"] == "Doctor")
+        self.assertFalse(doctor["matched_subjects"] or doctor["matched_interests"] or doctor["matched_skills"])
+        self.assertTrue(doctor["preferred_career"])
+        self.assertTrue(any("do not overlap" in reason for reason in doctor["reasons"]))
+        self.assertTrue(doctor["related_alternatives"])
+        self.assertNotEqual(results[0]["name"], "Doctor")
+
+
+class RecommendationScenarioTests(unittest.TestCase):
+    def test_software_developer_matches_programming_math_and_technology(self):
+        results = recommend_careers({
+            "education": "Grade 12",
+            "subjects": ["Mathematics", "Computer Science"],
+            "interests": ["Technology", "Programming"],
+            "skills": ["Programming", "Python"],
+        })
+        self.assertEqual(results[0]["name"], "Software Developer")
+
+    def test_graphic_design_is_among_top_matches_for_art_and_creativity(self):
+        results = recommend_careers({
+            "subjects": ["Art", "Design"],
+            "interests": ["Creativity", "Design"],
+            "skills": ["Drawing", "Creativity"],
+        })
+        self.assertIn("Graphic Designer", [item["name"] for item in results[:3]])
+
+    def test_doctor_matches_biology_chemistry_and_healthcare(self):
+        results = recommend_careers({
+            "subjects": ["Biology", "Chemistry"],
+            "interests": ["Healthcare", "Medicine"],
+            "skills": ["Empathy", "Communication"],
+        })
+        self.assertIn("Doctor", [item["name"] for item in results[:2]])
+
+    def test_astronaut_matches_physics_math_and_space(self):
+        results = recommend_careers({
+            "subjects": ["Physics", "Mathematics"],
+            "interests": ["Space", "Exploration"],
+            "skills": ["Problem solving", "Teamwork"],
+        })
+        self.assertEqual(results[0]["name"], "Astronaut")
+
+    def test_conflicting_answers_return_relevant_careers_deterministically(self):
+        profile = {
+            "subjects": ["Biology", "Computer Science"],
+            "interests": ["Healthcare", "Technology"],
+            "skills": ["Empathy", "Programming"],
+        }
+        results = recommend_careers(profile)
+        self.assertIn("Doctor", [item["name"] for item in results])
+        self.assertIn("Software Developer", [item["name"] for item in results])
+        self.assertEqual(results, recommend_careers(profile))
+
+    def test_sparse_answers_only_return_careers_with_signal_evidence(self):
+        results = recommend_careers({
+            "interests": ["Space exploration"],
+            "subjects": [],
+            "skills": [],
+        })
+        self.assertEqual([item["name"] for item in results], ["Astronaut"])
 
 
 if __name__ == "__main__":

@@ -1,0 +1,3 @@
+# Optional dependencies for offline recommendation-model training.
+# The live application remains usable with its rule-based engine without this file.
+scikit-learn>=1.5,<2

@@ -16,7 +16,13 @@
 <nav class="navbar border-bottom">
     <div class="container">
         <a class="navbar-brand fw-bold text-primary" href="/"><i class="fa-solid fa-compass me-2"></i>CareerPath</a>
-        <div class="d-flex gap-3 align-items-center ms-auto"><a class="nav-link" href="/explore">Explore</a><a class="nav-link" href="/dashboard">Dashboard</a><a class="nav-link" href="/settings">Settings</a></div>
+        <div class="d-flex gap-3 align-items-center ms-auto"><a class="nav-link" href="/explore">Explore</a>
+            {% if IS_LOGGED_IN %}
+            <a class="nav-link" href="/dashboard">Dashboard</a><a class="nav-link" href="/settings">Settings</a><button type="button" class="btn btn-outline-secondary btn-sm" data-auth-logout>Logout</button>
+            {% else %}
+            <a class="nav-link" href="/login">Log in</a><a class="btn btn-primary btn-sm" href="/get-started">Sign up</a>
+            {% end if %}
+        </div>
     </div>
 </nav>
 <main class="page-shell">

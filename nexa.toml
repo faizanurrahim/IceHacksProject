@@ -1,0 +1,6 @@
+[scripts]
+app = "index.py"
+# run with nexa run app or python -m Nexa run app
+[tool.nova]
+package = "Career-Path"
+version = "1.0.0"

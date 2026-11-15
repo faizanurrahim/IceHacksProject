@@ -41,6 +41,32 @@
 
     applyTheme(savedTheme || "system");
 
+    document.addEventListener("click", async function (event) {
+        const button = event.target.closest("[data-auth-logout]");
+        if (!button) return;
+
+        button.disabled = true;
+        try {
+            const response = await fetch("/api/v1/auth/logout", { method: "POST" });
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || "Unable to end your session. Please try again.");
+            }
+            window.location.assign("/");
+        } catch (error) {
+            button.disabled = false;
+            let status = button.parentElement.querySelector("[data-logout-status]");
+            if (!status) {
+                status = document.createElement("span");
+                status.dataset.logoutStatus = "true";
+                status.className = "text-danger small";
+                status.setAttribute("role", "alert");
+                button.insertAdjacentElement("afterend", status);
+            }
+            status.textContent = error.message || "Unable to end your session. Please try again.";
+        }
+    });
+
     document.addEventListener("DOMContentLoaded", function () {
         const host = document.querySelector("nav .container") || document.querySelector(".sidebar");
         if (!host) return;

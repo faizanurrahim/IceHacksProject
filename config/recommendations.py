@@ -85,27 +85,69 @@ ALIASES = {
     "coding": "programming",
     "computer programming": "programming",
     "computing": "computer science",
+    "technology and programming": "technology programming",
+    "art and design": "art design",
+    "healthcare": "health",
+    "space exploration": "space",
 }
 
 
 def _normalise(value: str) -> str:
-    normalized = " ".join(value.casefold().replace("&", " ").split())
+    normalized = " ".join(value.strip().casefold().replace("&", " ").split())
     return ALIASES.get(normalized, normalized)
 
 
+def _normalise_values(values) -> list[str]:
+    if not isinstance(values, (list, tuple)):
+        return []
+    normalized = []
+    for value in values:
+        if isinstance(value, str) and value.strip() and len(value.strip()) <= 80:
+            item = _normalise(value)
+            if item and item not in normalized:
+                normalized.append(item)
+    return normalized
+
+
 def _matches(profile_values: list[str], signals: tuple[str, ...]) -> list[str]:
-    values = [_normalise(value) for value in profile_values]
+    values = _normalise_values(profile_values)
     return [
         signal
         for signal in signals
-        if any(signal in value or value in signal for value in values)
+        if any(
+            _normalise(signal) in value or value in _normalise(signal)
+            for value in values
+        )
     ]
 
 
+def _coverage_score(weight: int, matched: list[str], signals: tuple[str, ...]) -> float:
+    unique_signals = {_normalise(signal) for signal in signals}
+    if not unique_signals:
+        return 0
+    unique_matches = {_normalise(signal) for signal in matched}
+    return weight * len(unique_matches) / len(unique_signals)
+
+
+def _has_answer_evidence(result: dict) -> bool:
+    return bool(result["matched_subjects"] or result["matched_interests"] or result["matched_skills"])
+
+
 def recommend_careers(description: dict, limit: int = 5) -> list[dict]:
+    if not isinstance(description, dict):
+        return []
+    try:
+        requested_limit = int(limit)
+    except (TypeError, ValueError):
+        requested_limit = 5
+    if isinstance(limit, bool):
+        requested_limit = 5
+    requested_limit = min(max(requested_limit, 1), len(careers))
+
     education = description.get("education", "")
-    education_level = EDUCATION_LEVELS.get(_normalise(education), 0)
-    preferred = description.get("preferred_careers", [])
+    education = education.strip() if isinstance(education, str) and len(education) <= 80 else ""
+    education_level = EDUCATION_LEVELS.get(_normalise(education), -1) if education else -1
+    preferred = _normalise_values(description.get("preferred_careers", []))
     subjects = description.get("subjects", [])
     interests = description.get("interests", [])
     skills = description.get("skills", [])
@@ -116,34 +158,39 @@ def recommend_careers(description: dict, limit: int = 5) -> list[dict]:
         matched_subjects = _matches(subjects, subject_signals)
         matched_interests = _matches(interests, interest_signals)
         matched_skills = _matches(skills, skill_signals)
-        preferred_match = any(
-            _normalise(career) == _normalise(value) or
-            _normalise(career) in _normalise(value)
-            for value in preferred
-        )
+        preferred_match = _normalise(career) in preferred
         required_level = {"school": 0, "undergraduate": 1, "graduate": 2}[level]
-        education_match = education_level >= required_level
-
-        score = (
-            25 * bool(matched_subjects)
-            + 30 * bool(matched_interests)
-            + 25 * bool(matched_skills)
-            + 15 * preferred_match
-            + 5 * education_match
+        education_match = education_level >= required_level if education_level >= 0 else False
+        subject_score = _coverage_score(25, matched_subjects, subject_signals)
+        interest_score = _coverage_score(30, matched_interests, interest_signals)
+        skill_score = _coverage_score(25, matched_skills, skill_signals)
+        preference_score = 15 if preferred_match else 0
+        education_score = 5 if education_match else 0
+        score = round(
+            subject_score + interest_score + skill_score
+            + preference_score + education_score
         )
+        skill_gaps = [
+            skill for skill in learn
+            if _normalise(skill) not in _normalise_values(skills)
+        ]
         reasons = []
         if matched_subjects:
-            reasons.append("Your favourite subjects connect to " + ", ".join(matched_subjects))
+            reasons.append("Matched subjects: " + ", ".join(matched_subjects))
         if matched_interests:
-            reasons.append("This aligns with your interests in " + ", ".join(matched_interests))
+            reasons.append("Matched interests: " + ", ".join(matched_interests))
         if matched_skills:
-            reasons.append("You already listed related skills: " + ", ".join(matched_skills))
+            reasons.append("Matched skills: " + ", ".join(matched_skills))
         if preferred_match:
-            reasons.append("You included this career in your preferences")
+            reasons.append("Your selected dream career added a 15-point preference boost.")
         if education_match:
-            reasons.append("Your current education level fits this early exploration path")
-        if not reasons:
-            reasons.append("Explore this path to see whether its day-to-day work interests you")
+            reasons.append("Your education level is broadly compatible with exploring this training path.")
+        if preferred_match and not (matched_subjects or matched_interests or matched_skills):
+            reasons.append(
+                "Your current subject, interest, and skill answers do not overlap with this career's configured signals."
+            )
+        if skill_gaps:
+            reasons.append("Skills to build: " + ", ".join(skill_gaps))
 
         results.append({
             "career": career,
@@ -152,8 +199,20 @@ def recommend_careers(description: dict, limit: int = 5) -> list[dict]:
             "score": score,
             "match_percentage": score,
             "reasons": reasons,
+            "matched_subjects": matched_subjects,
+            "matched_interests": matched_interests,
             "relevant_skills": matched_skills,
-            "suggested_skills": list(learn),
+            "matched_skills": matched_skills,
+            "skill_gaps": skill_gaps,
+            "preferred_career": preferred_match,
+            "component_scores": {
+                "subjects": round(subject_score, 1),
+                "interests": round(interest_score, 1),
+                "skills": round(skill_score, 1),
+                "preferred_career": preference_score,
+                "education": education_score,
+            },
+            "suggested_skills": skill_gaps,
             "next_steps": [
                 f"Explore introductory resources in {career.lower()}",
                 "Try a beginner project, course, or volunteer experience",
@@ -161,5 +220,56 @@ def recommend_careers(description: dict, limit: int = 5) -> list[dict]:
             ],
         })
 
-    results.sort(key=lambda result: (-result["score"], result["career"]))
-    return results[:limit]
+    relevant = [
+        result for result in results
+        if _has_answer_evidence(result) or result["preferred_career"]
+    ]
+    relevant.sort(key=lambda result: (-result["score"], result["career"]))
+    selected = relevant[:requested_limit]
+    selected_ids = {result["id"] for result in selected}
+    for preferred_career in preferred:
+        preferred_result = next(
+            (
+                result for result in relevant
+                if _normalise(result["career"]) == preferred_career
+            ),
+            None,
+        )
+        if preferred_result and preferred_result["id"] not in selected_ids:
+            selected.append(preferred_result)
+            selected_ids.add(preferred_result["id"])
+    selected.sort(key=lambda result: (-result["score"], result["career"]))
+
+    evidence_sets = {
+        result["id"]: {
+            "subjects": set(result["matched_subjects"]),
+            "interests": set(result["matched_interests"]),
+            "skills": set(result["matched_skills"]),
+        }
+        for result in relevant
+    }
+    for result in selected:
+        if not result["preferred_career"]:
+            continue
+        own_evidence = evidence_sets[result["id"]]
+        alternatives = []
+        for candidate in relevant:
+            if candidate["id"] == result["id"]:
+                continue
+            candidate_evidence = evidence_sets[candidate["id"]]
+            overlap = sum(
+                len(own_evidence[field] & candidate_evidence[field])
+                for field in ("subjects", "interests", "skills")
+            )
+            alternatives.append((overlap, candidate["score"], candidate["career"]))
+        alternatives.sort(key=lambda item: (-item[0], -item[1], item[2]))
+        result["related_alternatives"] = [
+            name for overlap, _, name in alternatives if overlap > 0
+        ][:3]
+        if not result["related_alternatives"]:
+            result["related_alternatives"] = [
+                candidate["career"]
+                for candidate in relevant
+                if candidate["id"] != result["id"]
+            ][:3]
+    return selected

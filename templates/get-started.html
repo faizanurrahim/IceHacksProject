@@ -233,10 +233,17 @@
                 <i class="fa-solid fa-compass me-2"></i>CareerPath
             </a>
 
+            {% if IS_LOGGED_IN %}
+            <div class="d-flex align-items-center gap-3">
+                <a class="btn btn-outline-primary btn-sm" href="/dashboard">Dashboard</a>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-auth-logout>Logout</button>
+            </div>
+            {% else %}
             <div class="small text-secondary">
                 Already have an account?
                 <a href="/login" class="login-link ms-1">Sign in</a>
             </div>
+            {% end if %}
         </div>
     </nav>
 

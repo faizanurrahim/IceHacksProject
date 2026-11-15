@@ -20,7 +20,12 @@
     <div class="container">
         <a class="navbar-brand fw-bold text-primary" href="/"><i class="fa-solid fa-compass me-2"></i>CareerPath</a>
         <div class="d-flex gap-3 align-items-center ms-auto">
-            <a class="nav-link" href="/explore">Explore</a><a class="nav-link" href="/career-quiz">Career quiz</a><a class="nav-link" href="/login">Log in</a>
+            <a class="nav-link" href="/explore">Explore</a><a class="nav-link" href="/career-quiz">Career quiz</a>
+            {% if IS_LOGGED_IN %}
+            <a class="nav-link" href="/dashboard">Dashboard</a><button type="button" class="btn btn-outline-secondary btn-sm" data-auth-logout>Logout</button>
+            {% else %}
+            <a class="nav-link" href="/login">Log in</a><a class="nav-link" href="/get-started">Sign up</a>
+            {% end if %}
         </div>
     </div>
 </nav>

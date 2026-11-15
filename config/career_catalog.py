@@ -392,6 +392,78 @@ EDUCATION_BY_CATEGORY = {
     "Skilled Trades & Hospitality": "Practical training and supervised experience are useful; check local safety and licensing rules.",
 }
 
+COUNTRY_GUIDANCE = {
+    "Pakistan": {
+        "education_pathway": (
+            "A common route is secondary school followed by intermediate, A-level, or equivalent study, "
+            "then role-relevant university, technical, vocational, or supervised training."
+        ),
+        "learning_opportunities": (
+            "Compare recognized universities, colleges, technical and vocational providers, apprenticeships, "
+            "and relevant professional bodies."
+        ),
+    },
+    "India": {
+        "education_pathway": (
+            "A common route is secondary school followed by higher-secondary (Class 11–12) or equivalent study, "
+            "then role-relevant university, technical, vocational, or supervised training."
+        ),
+        "learning_opportunities": (
+            "Compare recognized universities, colleges, technical and vocational providers, apprenticeships, "
+            "and relevant professional bodies."
+        ),
+    },
+    "United States": {
+        "education_pathway": (
+            "A common route is high school or equivalent, followed by role-relevant college, community college, "
+            "technical training, apprenticeship, or supervised professional education."
+        ),
+        "learning_opportunities": (
+            "Compare accredited colleges, community colleges, technical programs, apprenticeships, and relevant "
+            "professional bodies."
+        ),
+    },
+    "United Kingdom": {
+        "education_pathway": (
+            "A common route combines secondary qualifications with a relevant further-education, university, "
+            "technical, vocational, or apprenticeship pathway."
+        ),
+        "learning_opportunities": (
+            "Compare universities, further-education colleges, apprenticeships, and relevant professional bodies."
+        ),
+    },
+    "Canada": {
+        "education_pathway": (
+            "A common route is provincial or territorial secondary-school graduation followed by role-relevant "
+            "university, college, technical, vocational, apprenticeship, or supervised training."
+        ),
+        "learning_opportunities": (
+            "Compare recognized universities, colleges, polytechnics, apprenticeships, and provincial or "
+            "professional regulators."
+        ),
+    },
+    "Australia": {
+        "education_pathway": (
+            "A common route is senior secondary study followed by role-relevant university, TAFE or other "
+            "vocational education, apprenticeship, or supervised training."
+        ),
+        "learning_opportunities": (
+            "Compare universities, TAFE and other registered training providers, apprenticeships, and relevant "
+            "professional bodies."
+        ),
+    },
+    "Other / not listed": {
+        "education_pathway": (
+            "Education pathways differ by country and region. Check the secondary-school, university, technical, "
+            "vocational, and apprenticeship routes available where you live."
+        ),
+        "learning_opportunities": (
+            "Look for recognized local colleges or universities, technical and vocational providers, "
+            "apprenticeships, and relevant professional bodies."
+        ),
+    },
+}
+
 
 def _category_for(career):
     for category, names in CAREER_CATEGORIES.items():
@@ -505,35 +577,67 @@ def find_career(career_id):
 
 
 def quiz_recommendations(answers, limit=5):
+    country = answers.get("country", "Other / not listed")
+    if country not in COUNTRY_GUIDANCE:
+        country = "Other / not listed"
+    preferred_career = answers.get("preferred_career", "")
     profile = {
-        "education": answers["education"],
-        "subjects": answers["subjects"],
-        "interests": answers["interests"],
-        "skills": answers["skills"],
-        "preferred_careers": [],
+        "education": answers.get("education", ""),
+        "subjects": answers.get("subjects", []),
+        "interests": answers.get("interests", []),
+        "skills": answers.get("skills", []),
+        "preferred_careers": [preferred_career] if preferred_career else [],
     }
     results = []
     for result in recommend_careers(profile, limit=len(careers)):
         career = find_career(result["id"])
         matched_styles = [
-            style for style in answers["work_styles"]
+            style for style in answers.get("work_styles", [])
             if style in CAREER_STYLES.get(career["name"], ())
         ]
-        score = round(result["score"] * 0.85 + (
-            15 * len(matched_styles) / max(len(answers["work_styles"]), 1)
-        ))
+        if answers.get("work_styles"):
+            style_score = 15 * len(matched_styles) / len(answers["work_styles"])
+            score = round(result["score"] * 0.85 + style_score)
+        else:
+            style_score = 0
+            score = result["score"]
         reasons = list(result["reasons"])
         if matched_styles:
             reasons.append(
                 "This role can include your preferred work style: "
                 + ", ".join(WORK_STYLE_LABELS[style] for style in matched_styles)
             )
+        elif answers.get("work_styles"):
+            reasons.append("Your selected work styles did not match this role's configured work-style signals.")
         results.append({
             **result,
             "score": score,
             "match_percentage": score,
             "reasons": reasons,
             "category": career["category"],
+            "matched_work_styles": matched_styles,
+            "country_guidance": {
+                "country": country,
+                **COUNTRY_GUIDANCE[country],
+                "career_training": career["education"],
+                "qualification_note": (
+                    "Admissions, certification, and licensing vary by institution, profession, and region. "
+                    "Confirm current requirements with the relevant local institution or regulator."
+                ),
+            },
+            "component_scores": {
+                **result["component_scores"],
+                "work_styles": round(style_score, 1),
+            },
         })
     results.sort(key=lambda result: (-result["score"], result["name"]))
-    return results[:limit]
+    selected = results[:limit]
+    if preferred_career:
+        preferred_result = next(
+            (result for result in results if result["name"] == preferred_career),
+            None,
+        )
+        if preferred_result and all(item["id"] != preferred_result["id"] for item in selected):
+            selected[-1:] = [preferred_result]
+            selected.sort(key=lambda result: (-result["score"], result["name"]))
+    return selected

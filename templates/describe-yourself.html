@@ -121,9 +121,16 @@
             <i class="fa-solid fa-compass"></i> CareerPath
         </a>
 
+        {% if IS_LOGGED_IN %}
+        <div class="d-flex align-items-center gap-3 ms-auto">
+            <a href="/dashboard" class="btn btn-outline-primary btn-sm">Dashboard</a>
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-auth-logout>Logout</button>
+        </div>
+        {% else %}
         <span class="text-muted small">
             Career discovery
         </span>
+        {% end if %}
     </div>
 </nav>
 

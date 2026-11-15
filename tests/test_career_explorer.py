@@ -56,6 +56,27 @@ class CareerCatalogTests(unittest.TestCase):
         self.assertTrue(all(0 <= result["score"] <= 100 for result in results))
         self.assertEqual(len(results), 10)
 
+    def test_quiz_country_guidance_and_dream_career_are_included(self):
+        answers = {
+            "country": "Pakistan",
+            "education": "Grade 12",
+            "preferred_career": "Doctor",
+            "subjects": ["Mathematics"],
+            "interests": ["Technology"],
+            "skills": ["Programming"],
+            "work_styles": [],
+        }
+        results = quiz_recommendations(answers)
+        doctor = next(result for result in results if result["name"] == "Doctor")
+        self.assertEqual(doctor["country_guidance"]["country"], "Pakistan")
+        self.assertIn("intermediate", doctor["country_guidance"]["education_pathway"])
+        self.assertTrue(doctor["preferred_career"])
+        self.assertIn("do not overlap", " ".join(doctor["reasons"]))
+        self.assertEqual(
+            [item["score"] for item in results],
+            sorted((item["score"] for item in results), reverse=True),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

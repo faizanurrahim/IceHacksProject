@@ -10,15 +10,30 @@ main = Blueprint("main")
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
+def render_page(template_name, is_logged_in=None):
+    if is_logged_in is None:
+        is_logged_in = is_valid_session()
+    response = render_template(
+        template_name,
+        IS_LOGGED_IN=is_logged_in,
+    )
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
 def _protected_template(template_name):
     if not is_valid_session():
-        return Response("", status=302, headers={"Location": "/login"})
-    return render_template(template_name)
+        return Response(
+            "",
+            status=302,
+            headers={"Location": "/login", "Cache-Control": "no-store"},
+        )
+    return render_page(template_name, is_logged_in=True)
 
 
 @main.route("/get-started")
 def get_started():
-    return render_template("get-started.html")
+    return render_page("get-started.html")
 
 
 @main.route("/describe-yourself")
@@ -28,7 +43,7 @@ def describe_yourself():
 
 @main.route("/login")
 def login_page():
-    return render_template("login.html")
+    return render_page("login.html")
 
 
 @main.route("/dashboard")
@@ -43,22 +58,22 @@ def settings():
 
 @main.route("/explore")
 def explore():
-    return render_template("career-explorer.html")
+    return render_page("career-explorer.html")
 
 
 @main.route("/career-quiz")
 def career_quiz():
-    return render_template("career-quiz.html")
+    return render_page("career-quiz.html")
 
 
 @main.route("/compare")
 def compare():
-    return render_template("career-compare.html")
+    return render_page("career-compare.html")
 
 
 @main.route("/career")
 def career_detail():
-    return render_template("career-roadmap.html")
+    return render_page("career-roadmap.html")
 
 
 @main.route("/my-learning")

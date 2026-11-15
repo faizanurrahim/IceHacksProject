@@ -16,7 +16,17 @@
 <nav class="navbar border-bottom">
     <div class="container">
         <a href="/dashboard" class="navbar-brand fw-bold text-primary"><i class="fa-solid fa-compass me-2"></i>CareerPath</a>
-        <a href="/dashboard" class="btn btn-outline-secondary btn-sm ms-auto">Back to dashboard</a>
+        {% if IS_LOGGED_IN %}
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <a href="/dashboard" class="btn btn-outline-secondary btn-sm">Back to dashboard</a>
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-auth-logout>Logout</button>
+        </div>
+        {% else %}
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <a href="/login" class="btn btn-outline-secondary btn-sm">Log in</a>
+            <a href="/get-started" class="btn btn-primary btn-sm">Sign up</a>
+        </div>
+        {% end if %}
     </div>
 </nav>
 <main class="settings-wrap">

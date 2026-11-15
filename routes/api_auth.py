@@ -10,13 +10,23 @@ from Nexa import Blueprint
 from Nexa.nserver import request
 
 from config.ERR import RaiseJSONErr
-from config.db import career_learning, career_profiles, client, users
+from config.db import (
+    career_feedback,
+    career_learning,
+    career_profiles,
+    client,
+    persistent_sessions,
+    users,
+)
 from config.security import (
     authenticate_request,
     clear_session_cookie,
     create_session_token,
+    get_request_token,
     json_response,
     jwt_secret,
+    persist_session_token,
+    revoke_persistent_session,
     session_cookie,
 )
 
@@ -24,17 +34,24 @@ authapi = Blueprint("authAPI", "/api/v1/auth")
 password_hasher = PasswordHasher()
 
 
-def _session_response(user: dict, message: str, status: int = 200):
+def _session_response(
+    user: dict,
+    message: str,
+    status: int = 200,
+    remember_me: bool = False,
+):
     user_data = {
         "id": str(user["_id"]),
         "full_name": user["full_name"],
         "email": user["email"],
         "is_verified": user.get("is_verified", False),
     }
+    token = create_session_token(user_data["id"], remember_me=remember_me)
+    persist_session_token(token, user_data["id"], remember_me)
     return json_response(
         {"success": True, "message": message, "user": user_data},
         status=status,
-        headers={"Set-Cookie": session_cookie(create_session_token(user_data["id"]))},
+        headers={"Set-Cookie": session_cookie(token, remember_me=remember_me)},
     )
 
 
@@ -100,6 +117,9 @@ def login():
             return RaiseJSONErr("Email and password are required", 400)
         if len(password) > 128:
             return RaiseJSONErr("Password must be 128 characters or fewer", 400)
+        remember_me = data.get("remember_me", False)
+        if not isinstance(remember_me, bool):
+            return RaiseJSONErr("Remember this device must be true or false", 400)
 
         user = users.find_one({"email": email})
         if user is None:
@@ -117,7 +137,7 @@ def login():
                 {"_id": user["_id"]},
                 {"$set": {"password_hash": password_hasher.hash(password)}},
             )
-        return _session_response(user, "Login successful")
+        return _session_response(user, "Login successful", remember_me=remember_me)
     except PyMongoError:
         logging.exception("MongoDB login error")
         return RaiseJSONErr("Database operation failed", 500)
@@ -128,6 +148,11 @@ def login():
 
 @authapi.post("/logout")
 def logout():
+    try:
+        revoke_persistent_session(get_request_token())
+    except PyMongoError:
+        logging.exception("Persistent session revocation failed during logout")
+        return RaiseJSONErr("Unable to end this session", 500)
     return json_response(
         {"success": True, "message": "Logged out"},
         headers={"Set-Cookie": clear_session_cookie()},
@@ -191,6 +216,8 @@ def delete_account():
         def remove_account(session):
             career_profiles.delete_one({"user_id": user_id}, session=session)
             career_learning.delete_one({"user_id": user_id}, session=session)
+            career_feedback.delete_many({"user_id": user_id}, session=session)
+            persistent_sessions.delete_many({"user_id": user_id}, session=session)
             result = users.delete_one({"_id": ObjectId(user_id)}, session=session)
             if result.deleted_count != 1:
                 raise RuntimeError("User account no longer exists")

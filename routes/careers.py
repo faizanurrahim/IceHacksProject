@@ -1,22 +1,24 @@
 import logging
 
+from bson import ObjectId
 from Nexa import Blueprint
 from Nexa.nserver import request
+from pymongo.errors import PyMongoError
 
 from config.ERR import RaiseJSONErr
 from config.career_catalog import (
     CAREER_CATEGORIES,
     find_career,
     get_career_catalog,
-    quiz_recommendations,
 )
+from config.db import career_feedback, career_learning, users
 from config.careers import careers
-from config.security import json_response
+from config.security import authenticate_request, json_response
+from AI.dataset import validate_feedback, normalize_quiz_answers
+from AI.engine import recommend
+from AI.learner import save_feedback, withdraw_training_feedback
 
 career_explorer_api = Blueprint("careerExplorerAPI", "/api/v1")
-VALID_WORK_STYLES = {
-    "people", "analytical", "hands_on", "creative", "structured", "independent",
-}
 
 
 def _positive_id(value):
@@ -89,30 +91,84 @@ def career_quiz():
     data = request.json
     if not isinstance(data, dict):
         return RaiseJSONErr("Invalid JSON request", 400)
-    fields = ("education", "subjects", "interests", "skills", "work_styles")
-    if set(data) != set(fields):
-        return RaiseJSONErr("Provide education, subjects, interests, skills, and work_styles", 400)
-    education = data.get("education")
-    if not isinstance(education, str) or not education.strip() or len(education) > 80:
-        return RaiseJSONErr("Choose a valid education level", 400)
-    answers = {"education": education.strip()}
-    for field in ("subjects", "interests", "skills", "work_styles"):
-        values = data.get(field)
-        if (
-            not isinstance(values, list)
-            or not 1 <= len(values) <= 12
-            or not all(isinstance(value, str) and value.strip() and len(value) <= 80 for value in values)
-        ):
-            return RaiseJSONErr(f"Choose between 1 and 12 valid {field.replace('_', ' ')}", 400)
-        answers[field] = list(dict.fromkeys(value.strip() for value in values))
-    invalid_styles = set(answers["work_styles"]) - VALID_WORK_STYLES
-    if invalid_styles:
-        return RaiseJSONErr("One or more work styles are invalid", 400)
     try:
+        answers = normalize_quiz_answers(data)
+    except ValueError as exc:
+        return RaiseJSONErr(str(exc), 400)
+    try:
+        user_id, _ = authenticate_request()
+        learning = (
+            career_learning.find_one({"user_id": user_id})
+            if user_id else None
+        )
+        result = recommend(
+            answers,
+            preferences=(learning or {}).get("recommendation_preferences"),
+        )
         return json_response({
             "success": True,
-            "recommendations": quiz_recommendations(answers),
+            **result,
         })
+    except PyMongoError:
+        logging.exception("Career quiz preference lookup failed")
+        return RaiseJSONErr("Unable to load saved recommendation preferences", 500)
     except (KeyError, TypeError, ValueError):
         logging.exception("Career quiz scoring error")
         return RaiseJSONErr("Unable to generate career recommendations", 500)
+
+
+@career_explorer_api.post("/career-quiz/feedback")
+def submit_career_feedback():
+    data = request.json
+    if not isinstance(data, dict):
+        return RaiseJSONErr("Invalid JSON request", 400)
+    user_id, auth_error = authenticate_request()
+    if auth_error:
+        return auth_error
+    try:
+        feedback = validate_feedback(data)
+    except ValueError as exc:
+        return RaiseJSONErr(str(exc), 400)
+
+    try:
+        if users.find_one({"_id": ObjectId(user_id)}, {"_id": 1}) is None:
+            return RaiseJSONErr("User account not found", 401)
+        is_new = save_feedback(
+            user_id,
+            feedback,
+            career_feedback,
+            career_learning,
+        )
+        return json_response({
+            "success": True,
+            "duplicate": not is_new,
+            "training_consent": feedback["training_consent"],
+            "stored_for_training": bool(is_new and feedback["training_consent"]),
+            "message": (
+                "Thanks. Your personal preferences were updated for future recommendations."
+                if is_new else "This feedback submission was already received."
+            ),
+        })
+    except PyMongoError:
+        logging.exception("Career recommendation feedback save failed")
+        return RaiseJSONErr("Unable to save recommendation feedback", 500)
+
+
+@career_explorer_api.delete("/career-quiz/feedback/training-consent")
+def withdraw_career_training_consent():
+    user_id, auth_error = authenticate_request()
+    if auth_error:
+        return auth_error
+    try:
+        deleted_count = withdraw_training_feedback(user_id, career_feedback)
+        return json_response({
+            "success": True,
+            "deleted_feedback_records": deleted_count,
+            "message": (
+                "Your opted-in feedback records were removed from future training datasets. "
+                "Already-promoted aggregate models are not automatically unlearned."
+            ),
+        })
+    except PyMongoError:
+        logging.exception("Career training-consent withdrawal failed")
+        return RaiseJSONErr("Unable to withdraw training consent", 500)

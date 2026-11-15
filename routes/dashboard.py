@@ -7,9 +7,9 @@ from Nexa import Blueprint
 from Nexa.nserver import request
 
 from config.ERR import RaiseJSONErr
-from config.db import users, career_profiles
-from config.recommendations import recommend_careers
+from config.db import users, career_profiles, career_learning
 from config.security import authenticate_request, json_response
+from AI.engine import recommend_profile
 
 dashboard_api = Blueprint("dashboardAPI", "/api/v1")
 
@@ -21,9 +21,17 @@ def dashboard_data(user_id):
 
     profile = career_profiles.find_one({"user_id": user_id})
     description = profile.get("description", {}) if profile else {}
+    learning = career_learning.find_one({"user_id": user_id}) or {}
     completed_fields = sum(
         bool(description.get(field))
         for field in ("education", "subjects", "interests", "skills", "preferred_careers")
+    )
+    recommendation_result = (
+        recommend_profile(
+            description,
+            preferences=learning.get("recommendation_preferences"),
+        )
+        if description else {"recommendations": [], "recommendation_engine": None}
     )
     return {
         "success": True,
@@ -40,7 +48,8 @@ def dashboard_data(user_id):
             "completion_percentage": completed_fields * 20,
             "description": description,
         },
-        "recommendations": recommend_careers(description) if description else [],
+        "recommendations": recommendation_result["recommendations"],
+        "recommendation_engine": recommendation_result["recommendation_engine"],
     }, None
 
 
@@ -75,9 +84,14 @@ def get_recommendations():
         profile = career_profiles.find_one({"user_id": user_id})
         if not profile:
             return RaiseJSONErr("Complete your career profile to get recommendations", 409)
+        learning = career_learning.find_one({"user_id": user_id}) or {}
+        recommendation_result = recommend_profile(
+            profile.get("description", {}),
+            preferences=learning.get("recommendation_preferences"),
+        )
         return json_response({
             "success": True,
-            "recommendations": recommend_careers(profile.get("description", {})),
+            **recommendation_result,
         })
     except PyMongoError:
         logging.exception("MongoDB recommendations error")

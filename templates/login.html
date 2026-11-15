@@ -115,10 +115,18 @@
 
 <nav class="navbar">
     <div class="container">
-        <a href="/get-started" class="brand">
+        <a href="/" class="brand">
             <i class="fa-solid fa-compass"></i>
             CareerPath
         </a>
+        {% if IS_LOGGED_IN %}
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <a href="/dashboard" class="btn btn-outline-primary btn-sm">Dashboard</a>
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-auth-logout>Logout</button>
+        </div>
+        {% else %}
+        <a href="/get-started" class="signup-link ms-auto">Sign up</a>
+        {% end if %}
     </div>
 </nav>
 
@@ -181,6 +189,14 @@
                 </div>
             </div>
 
+            <div class="form-check mb-4">
+                <input class="form-check-input" type="checkbox" id="rememberMe">
+                <label class="form-check-label" for="rememberMe">
+                    Remember this device for 30 days
+                    <span class="d-block text-muted small">Only use this on a trusted personal device.</span>
+                </label>
+            </div>
+
             <button
                 type="submit"
                 class="btn login-btn w-100"
@@ -192,6 +208,7 @@
 
         </form>
 
+        {% if not IS_LOGGED_IN %}
         <div class="text-center mt-4">
             <span class="text-muted">
                 Don't have an account?
@@ -201,6 +218,7 @@
                 Sign up
             </a>
         </div>
+        {% end if %}
 
     </div>
 
@@ -262,7 +280,8 @@
                 },
                 body: JSON.stringify({
                     email: email,
-                    password: password
+                    password: password,
+                    remember_me: document.getElementById("rememberMe").checked
                 })
             });
 

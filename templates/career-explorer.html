@@ -27,8 +27,13 @@
                 <a class="nav-link" href="/career-quiz">Career finder quiz</a>
                 <a class="nav-link" href="/compare">Compare careers</a>
                 <a class="nav-link" href="/my-learning">My learning</a>
+                {% if IS_LOGGED_IN %}
+                <a class="btn btn-outline-primary btn-sm" href="/dashboard">Dashboard</a>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-auth-logout>Logout</button>
+                {% else %}
                 <a class="nav-link" href="/login">Log in</a>
                 <a class="btn btn-primary btn-sm ms-lg-2" href="/get-started">Create account</a>
+                {% end if %}
             </div>
         </div>
     </div>
