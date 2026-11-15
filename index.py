@@ -25,4 +25,4 @@ app.register_blueprint(career_explorer_api)
 app.register_blueprint(learning_api)
 
 
-app.run()
+
